@@ -1,0 +1,37 @@
+To build the S/W unpack the distributed tar file. Cd into the root
+directory of the package and execute the script ./configure. This script
+will attempt to detect the platform you are on and build a sub-directory
+for it. Cd into the platform specific directory and run make.
+
+Currently the supported system types are AIX, FreeBSD, Linux, OSF, SCO5 and 
+Sun/OS. Others will probably work also. If your system is not detected
+automatically, specify one of the above system names on the configure
+command line. This, as above, will create a directory and give a reasonable
+make file for the OS you chose.
+
+Uucp style device locking is now supported. the option UUCP_LOCKING must be
+added to the configure command line to enable it. The default is to have no
+locking. I'll be honest, I myself use very little that requires it. I would
+appreciate any input on the configurations used on the various platforms,
+Linux included. If you need to tune it's behavior, you will find all of the
+tunable parameters in sysdefs.h. Change then as you see fit. If more
+configuration options as to file location are needed, please let me know.
+
+After the make completes you will find the binaries termnet/termnet,
+termnet/ttyd and termnetd/termnetd. As a convenience, these files are also
+copied to the directory named bin in the base directory. Copy these to an
+appropriate directory such as /usr/local/bin. cd back to the root directory
+and copy the three man pages in the directory doc to an appropriate
+directory. See the termnetd.1 man page for instructions on configuring the
+daemon, it has example entries fopr the termnetd.conf file and 
+termnetd/termnetd.conf can be used as a quick starting configuration for most
+linux systems. BE CAREFULL NOT TO CONNECT TO YOUR MOUSE!!!
+
+Minimal testing has been given on platforms other than Linux. I know the
+AIX version of termnet has problems. I'm not going to hold up this release
+because of it. When I get a chance, I will look into the problem. Being
+that I have little need for these programs on the other platforms, my
+priority is not as high as on Linux.
+
+If you have ANY fixes, please send them to me. I'll be happy to review them
+and will consider them for implimentation.

@@ -1,0 +1,87 @@
+05/22/02 Version 3.3
+	Fixed spputc to let it write null chars out.
+	Fixed configure script to use -f instead of -e
+	Added proper includes to remove warnings.
+	Brought the Licensing up todate.
+
+05/22/02 Version 3.2
+	Foralized the release.
+
+09/01/01 Version 3.2.beta3
+	Added patch provided by Vladimir Gurevich <vag@paulidav.org> for 
+	building on Sun.
+	Fixed a few compiler problems and warnings
+
+07/22/01 Version 3.2.beta2
+	Fixed Race condition causing ports left open by removing the dependency
+	on SIGCHLD.
+
+	Added ability to emulate 7bit Even parity data to the termnet client.
+
+01/08/00 Version 3.1
+	Moved the device opening in termnetd to the child processes to
+	fix a race condition.
+
+	Made small changes to the termnetd control port.
+
+	Made changes to facilitate to trnVars.h building on the newer 
+	Linux systems.
+
+
+10/10/98 Version 3.0
+	Added the -s option to termnetd to allow having a 'service port'.
+
+	Added the ttyd command to allow use of remote serial devices by
+	any program.
+
+	Added uucp style serial device locking.
+
+06/28/98 Version 2.05
+	Modified termnetd to use sigaction instead of signal. This should
+	make the server more robust in handling the death of children.
+
+	Added a Control Port for checking and modifying the 
+	status of the ports.
+
+02/21/97 Version 2.03 -> 2.04
+	Fixed nasty bug causing the server to die when DTR was pulled from
+	a serial device
+
+	Modified the build procedure to allow building for multiple platforms
+	easier. Mostly used in the hope of using NFS at work.
+
+	Added new platform support FreeBSD
+
+	Fixed broken compilations on the AIX platform
+
+11/15/96 Version 2.00 -> 2.03
+	Mostly little bug fixes here and there
+	(In other words I got lax keeping this log up to date, SORRY!)
+
+03/16/96 Version 1.07 -> 2.00
+
+	Moved  the  Special  telnet  options  to begin with 1. Because most
+	telnet  daemons  do  not respond to the options, a 5 second timeout
+	was  added.  If  this  timeout  expires,  it  is  assumed  that any
+	responses  for  the  special termnet options have been received and
+	normal execution will proceed.
+
+	Added SCO DEC OSF the list of Unix flavors that the program runs on
+
+	Completely overhauled the configuration files for termnetd. They
+	now allow for using termios tags for the serial device configuration
+
+02-02-96 Verion 1.06 -> 1.07
+
+	Fixed the Telnet Option handshaking that caused telnet to go into
+	LINEMODE when connecting to the server.
+
+	Removed the -l and -r options from termnet and replaced them with
+	the -e option to provide local echoing. Also changed the echo command
+	to accept either on or off instead of local and remote. These changes
+	were brought on by the first change.
+
+	Added TELOPT TTYPE and TELOPT XDISPLOC option handshaking to termnet
+	to provide a reasonable environment when connecting to telnet servers
+	for login purposes.
+

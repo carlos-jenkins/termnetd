@@ -1,0 +1,19 @@
+Begin4
+Title:		Termpkg, the Poor Man's Terminal Server
+Version:	3.3
+Entered-date:	05JUN03
+Description:	Termpkg is a terminal server daemon and simple telnet like client.
+Allows access to one or more serial ports through the telnet protocol. Can be
+configured to connect in a one to one relation of telnet ports to serial ports
+or in a round-robin fashion where one telnet port serves many serial ports.
+Keywords:	telnet serial terminal server.
+Author:		joe@croftj.net (Joe Croft)
+Maintained-by:	joe@croftj.net (Joe Croft) 
+Primary-site:	www.croftj.net/~termpkg
+		64KB termpkg-3.3.tgz
+Alternate-site:	sunsite.unc.edu /pub/Linux/system/network/serial
+		64KB termpkg-3.3.tgz
+Original-site:  
+Platforms:	Linux, SCO5, OSF/1 AIX FreeBSD
+Copying-policy:	GPL
+End

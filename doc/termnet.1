@@ -1,0 +1,248 @@
+.TH termnet 1 01/08/00 GNU Simple Telnet replacement
+
+.SH NAME
+termnet \- Simple Telnet replacement
+
+.SH SYNOPSIS
+.BR termnet
+[
+.I options
+]
+[
+.I host/port
+]
+[
+.I "chat-sequences"
+]
+
+.SH DESCRIPTION
+This man page documents the
+.BR termnet
+program. This command is a simple telnet replacement. It does
+not  implement for the complete telnet protocol, but does provide a few
+nifty  features  of  it's  own. Especially when used with the
+.BR termnetd
+terminal server daemon.
+.PP
+The following features are available:
+.IP
+Telnet compatible (it can used to connect to telnetd).
+.IP
+Live    setting  of  a  device's baud rate and port configuration when
+connected to the
+.BR termnetd
+terminal server daemon.
+.IP
+Simple scripting using chat-like sequences.
+.SH OPTIONS
+.TP
+.I "\-7
+Emulate 7 bit even parity data. This will calculate an even parity bit on the
+least significant 7 bits of each outgoing character and append it to the charater. 
+It will also strip the 8th (MSb) bit from the incomming data before displaying it.
+.TP
+.I "\-b baud-rate"
+Sets the initial baud-rate of the device.
+.TP
+.I \-c
+Do  not  drop  the  connection after running the chat sequences either
+presented on the command line or performed through the
+.I \-f
+option.
+.TP
+.I \-e
+Provide local echoing of the characters entered from the keyboard.
+.TP
+.I "\-f script-file"
+Run through the script specified by
+.IR script-file .
+.TP
+.I "\-o out-file"
+Sends all output to the file specified.
+.TP
+.I "\-p port-settings"
+Configures the port as specified by port settings. See the
+.BR PORT
+command below for further information.
+
+.SH COMMANDS
+Commands  may be given from within a script or by entering the command
+line  mode  using  the  escape  character  which is presently set to
+\'^]\'.  At this time, unlike with Telnet, the escape character cannot
+be changed.
+.PP
+The following commands are available:
+.PP
+.TP
+.I "$ [unix-command]"
+Executes  the 
+.I unix-command
+it's stdio redirected to the socket. Sadly,
+this  does  not  run  programs like sz and rz, though it is handily for
+down-loading  ASCII  files or the like. A space must be present between
+the
+.I $
+and the command.
+.TP
+.I "! [unix-command]"
+Executes the 
+.I unix-command
+and sends it's output to the output file (normally stdout).  A space 
+must be present between the
+.I !
+and the command.
+.TP
+.I "BAUD [baudrate]"
+If
+.IR baudrate
+is  present,  the  baud rate of the port is set to that. Otherwise the
+current baudrate of the port is displayed. The following baudrates are
+accepted:
+.PP
+.RS
+.RS
+.I 50
+.br
+.I 75
+.br
+.I 110
+.br
+.I 134
+.br
+.I 200
+.br
+.I 300
+.br
+.I 600
+.br
+.I 1200
+.br
+.I 2400
+.br
+.I 9600
+.br
+.I 19200
+.br
+.I 38400
+.RE
+.PP
+Accepted by Linux Only:
+.RS
+.PP
+.I 57600
+.br
+.I 115200
+.br
+.I 230400
+.RE
+.RE
+.TP
+.I "CHAT chat-file"
+This  command  executes  the chat-file specified. See the section CHAT
+Scripts for further information.
+.TP
+.I DEVC
+Displays the name of the physical device that is connected.
+.TP
+.I "ECHO [string]"
+Echoes
+.I string
+to the output.
+.TP
+.I "ECHO ON|OFF"
+Turns  the  local  echoing of characters input from the keyboard on or
+off.
+.TP
+.I EXIT
+Closes the connection and exits the program.
+.TP
+.I "PAUSE secs"
+Causes the interpretation of commands to be paused for
+.I secs
+seconds. Most useful in chat scripts.
+.TP
+.I "PORT [port-settings]"
+If
+.I port-settings
+is  present,  the  port  will  be  configured  to them. Otherwise, the
+current  settings  will  be displayed. The settings are specified by a
+string of one or more of the following concatenated together with no
+intervening spaces:
+.RS
+.PP
+.I 8
+8 Bits / Character
+.br
+.I 7
+7 Bits / Character
+.br
+.I 6
+6 Bits / Character
+.br
+.I 5
+5 Bits / Character
+.br
+.I N
+No Parity
+.br
+.I E
+Even Parity
+.br
+.I O
+Odd Parity
+.br
+.I C0
+No H/W Flow Control
+.br
+.I C1
+H/W Flow Control
+.br
+.I S0
+No S/W Flow Control
+.br
+.I S1
+S/W Flow Control
+
+.SH "CHAT SCRIPTS"
+The  chat  scripts are composed of a sequence of send strings followed
+by  expect strings. The program will first send a string then wait for
+the  expected  string  to be received. Commands my be injected into the
+sequence  at  any  point  be surrounding the entire command with  \'`\'
+quotes.  The  biggest weakness is that there are no time limits on how
+long  the  program  will wait for the expected string. Fortunately the
+keyboard is fully active while they are being executed.
+
+.SS EXAMPLE SCRIPT
+The  following is an example of a chat script. In practice I keep this
+script  in  the  file  /usr/lib/ppp/connect-work.  It  logs me into my
+computer  as  a  special user that sets my computer to call me back to
+establish  a  PPP  link between my computer at home and my computer at
+work.
+.PP
+"atdt19725551212\\r"
+.br
+"ogin"
+.br
+"et\\r" "assword"
+.br
+"MyPassword\\r" "+++"
+.br
+"+++" "OK"
+.br
+"ath0\\r" "OK"
+.PP
+This  simple script dials out the number, then waits for \'ogin\' then
+logs in as the user \'et\' giving the required password when requested.
+At  that  point  it  waits to see a \'+++\' from the login script, and
+forces  the  modem  to  go  into the command mode with the \'+++\' and
+hangs it up with the \'ath0\' command.
+.PP
+Though  the quotes are not required, I find they make the scripts much
+easier  to  read. Also, if the script is on the command line, you have
+to be mindful of the substitutions that may occur from the shell.
+
+.SH "SEE ALSO"
+termnetd(1), ttyd(1), termios(2)
+
+.SH AUTHOR
+Joe Croft <joe@croftj.net>

@@ -1,0 +1,179 @@
+#!/bin/sh
+#set -x
+
+SYSTEM=`uname -a | cut -d ' ' -f 1`
+
+if [ "$SYSTEM" = "OSF1" ]
+then
+   SYSTEM=OSF
+elif [ "$SYSTEM" = "SCO_SV" ]
+then
+   SYSTEM=SCO
+elif [ "$SYSTEM" = "Linux" -o "$SYSTEM" = "linux" ]
+then
+   SYSTEM=LINUX
+fi
+
+usage() {
+   echo "Usage:: configure [options]";
+   echo "   Options:";
+   echo "       DBG             Build with debug turned on";
+   echo "       SCO             Build for SCO 5";
+   echo "       OSF             Build for DEC";
+   echo "       AIX             Build for AIX";
+   echo "       LINUX           Build for LINUX";
+   echo "       FreeBSD         Build for Free BSD";
+   echo "       uucp_locking    Use uucp style device locking";
+   
+   exit;
+}
+   
+while [ $# -gt 0 ];
+do
+   case "$1" in
+      DEC|dec) SYSTEM=OSF;;
+      
+      SCO|sco|OSF|osf|AIX|aix|FreeBSD|LINUX|Linux|linux) SYSTEM=$1;;
+      
+      DBG|dbg) DBG="-g";;
+      
+      uucp_locking|UUCP_LOCKING) LOCKING="-DUUCP_LOCKING";;
+
+      *) echo;
+         echo "Invalid option '$1'";
+	 echo;
+         usage;
+	 ;;
+   esac
+   shift;      
+done
+
+case "$SYSTEM" in
+   FreeBSD)       CC=cc;             
+                  LEX=lex;           
+                  CFLAGS="-I../libtn -D$SYSTEM -Wall";;
+
+   SCO)           CC=cc;             
+                  LEX=lex;           
+                  CFLAGS="-I../libtn -DLINEAR_PTY -D$SYSTEM";
+                  LIBS=-lsocket;;
+
+   OSF)           CC=cc;
+                  LEX=lex;
+                  CFLAGS="-I../libtn -D$SYSTEM";;
+                  
+   AIX)           CC=xlc
+                  LEX=lex;
+                  CFLAGS="-I../libtn -D$SYSTEM";;
+
+   LINUX)         LIBS=-lfl;
+                  CC=gcc;
+                  LEX=flex;
+                  CFLAGS="-I../libtn -D$SYSTEM -Wall";;
+
+   SunOS)         LIBS="-lfl -lnsl -lsocket";
+	          CC=gcc;
+                  LEX=flex;
+                  CFLAGS="-I../libtn -D$SYSTEM -Wall";;
+
+   *) echo;
+      echo "$SYSTEM is not supported";
+      exit;;
+   
+esac
+
+if [ ! -z "$LOCKING" ]
+then
+   CFLAGS="$CFLAGS $LOCKING"
+fi
+if [ ! -z "$DBG" ]
+then
+   CFLAGS="$CFLAGS $DBG"
+fi
+
+
+echo
+echo "Building with the following options: "
+echo "    $SYSTEM"
+if [ -n "$DBG" ]
+then
+   echo "    DBG"
+fi
+if [ ! -z "$LOCKING" ]
+then
+   echo "    Uucp Locking"
+fi
+echo
+DIRNAME=`echo $SYSTEM | tr A-Z a-z`
+if [ ! -d "$DIRNAME" ]
+then
+   mkdir $DIRNAME
+fi
+
+cd $DIRNAME
+
+if [ ! -d bin ]; then
+   mkdir bin
+fi
+
+cat ../Makefile.in | \
+awk -F \= -- \
+"/^%LIBS/ {gsub(\"@\",\"$LIBS\", \$2); print \"LIBS=\" \$2; next} \
+/^%CFLAGS/ {gsub(\"@\",\"$CFLAGS\", \$2); print \"CFLAGS=\" \$2; next} \
+/^%CC/ {gsub(\"@\",\"$CC\", \$2); print \"CC=\" \$2; next} \
+/^%LEX/ {gsub(\"@\",\"$LEX\", \$2); print \"LEX=\" \$2; next} \
+!/^%.*/ {print}" >Makefile
+
+for fn in `ls ../*.h`
+do
+   fn1=`basename $fn`
+   if [ ! -e $fn1 ]
+   then
+      ln -s $fn .
+   fi
+done;
+
+if [ ! -d libtn ]
+then
+   mkdir libtn
+fi
+if [ ! -d termnetd ]
+then
+   mkdir termnetd
+fi
+if [ ! -d termnet ]
+then
+   mkdir termnet
+fi
+
+cd libtn
+for fn in `ls ../../libtn/*.[clh] ../../libtn/*.mk`
+do
+   fn1=`basename $fn`
+   if [ ! -f $fn1 ]
+   then
+      ln -s $fn .
+   fi
+done;
+
+cd ../termnetd
+for fn in `ls ../../termnetd/*.[clh] ../../termnetd/*.mk`
+do
+   fn1=`basename $fn`
+   if [ ! -f $fn1 ]
+   then
+      ln -s $fn .
+   fi
+done;
+
+cd ../termnet
+for fn in `ls ../../termnet/*.[clh] ../../termnet/*.mk`
+do
+   fn1=`basename $fn`
+   if [ ! -f $fn1 ]
+   then
+      ln -s $fn .
+   fi
+done;
+
+

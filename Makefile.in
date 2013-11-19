@@ -1,0 +1,20 @@
+# Makefile for the terminal server client and server and the underlying
+# TelNet library
+
+%CC= @
+%CFLAGS= @
+%LIBS= @
+%LEX= @
+ 
+SUBDIRS	=	libtn termnet termnetd
+
+all:
+	set -e; for i in $(SUBDIRS); do cd $$i; $(MAKE) LEX="$(LEX)" CC="$(CC)" CFLAGS="$(CFLAGS)" LIBS="$(LIBS)" -f $$i.mk; cd ..; done
+	cp termnet/termnet bin
+	cp termnet/ttyd bin
+	cp termnetd/termnetd bin
+
+clean:
+	rm -f core
+	set -e; for i in $(SUBDIRS); do cd $$i; $(MAKE) -f $$i.mk clean; cd ..; done
+

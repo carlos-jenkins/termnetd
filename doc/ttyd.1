@@ -1,0 +1,65 @@
+.TH ttyd 1 01/08/00 GNU Remote Modem Utility for Unix
+
+.SH NAME
+ttyd \- Remote Modem Utility for Unix
+
+.SH SYNOPSIS
+.BR ttyd
+\-d
+.I pty device
+[
+.I options
+]
+.I host port
+
+.SH DESCRIPTION
+This man page documents the
+.BR ttyd
+remote modem daemon.
+The
+.BR ttyd
+daemon is fully telnet compatible allowing programs to connect to any remote
+device such as networked modems and terminal servers as if they were 
+local devices as long as the device utilizes the telnet protocol.
+.PP
+After opening a Master Pseudo tty device, the daemon will wait for some other process
+to open the corresponding slave device. Once the slave device is opened, a connection 
+will be made, using the telnet protocol, to a remote server. The remote end may be any
+server supporting the telnet protocol such as a terminal server, network modem, or 
+the 
+.BR termnetd
+process.
+.PP
+For reference, in Linux the Master Pseudo tty devices art the devices 
+.B /dev/pty[a-ep-z][0-9a-f]
+and the
+slave devices are 
+.B /dev/tty[a-ep-z][0-9a-f].
+Other Unices may have different naming schemes.
+
+.SH OPTIONS
+.TP
+.I "\-b baud-rate"
+Sets the initial baud-rate of the device.
+.TP
+.I "\-d pty device"
+Master Pseudo tty device to open and wait for a connection on. This
+.I option
+is not optional, it must be provided
+.I "\-p port-settings"
+Configures the port as specified by port settings.
+.TP
+.I "\-n"
+No detach, do not run as a background process.
+.PP
+The
+.I host
+and
+.I port 
+parameters specify the host and IP port to connect to when the Slave Pseudo device is
+opened.
+.SH "SEE ALSO"
+termnet(1), termnetd(1), termios(2)
+
+.SH AUTHOR
+Joe Croft <joe@croftj.net>

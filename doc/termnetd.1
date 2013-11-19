@@ -1,0 +1,250 @@
+.TH termnetd 1 01/08/00  GNU Terminal Server Daemon
+
+.SH NAME
+termnetd \- Terminal Server daemon
+
+.SH SYNOPSIS
+.B termnetd
+[\-s port] [\-c configfile] [\-d level] [\-n] [\-p] [\-v]
+
+.SH DESCRIPTION
+This man page documents the
+.BR termnetd
+terminal daemon. This command allows telnet sessions to be established
+with a unit's serial ports.
+.PP
+The following features are available:
+.IP
+A Control port for viewing and modifying the status of the ports
+.IP
+Telnet compatible.
+.IP
+Full device configuration.
+.IP
+Round robin port selection.
+.IP
+Multiple port configurations for each device.
+.IP
+Logs status & connection information to the system logs.
+.IP
+Live  setting of a device's baud rate and port configuration using the
+.BR termnet
+program.
+.IP
+Device  locking.  If    a   device is not available for a given TCP/IP
+port,  the  connection  will be closed with no error message after the
+connection  is  made.  Under  no  circumstances  will  2  simultaneous
+connections be made to a single device.
+.PP
+The    devices  are  not  opened until a connection is established to
+them.  Therefore, it is possible to still run Getty on the device. The
+drawback  to  this is that another program can open a device and there
+is no way for the daemon to tell that it is presently in use.
+.SH OPTIONS
+.TP
+.I "\-c config\-file"
+Set the configuration file to one other than the default of
+.BR "/etc/termnetd.conf"
+.TP
+.I "\-d level"
+Set the debug message level. Current levels are 1 - 5
+.TP
+.I \-n
+Stops  the  daemon  from  forking  and  detaching  from the controlling
+terminal. This is most useful for debugging purposes.
+.TP
+.I \-p
+Set the promiscuous mode (Currently does nothing).
+.TP
+.I \-s port
+Sets the IP port to listen to for the control port.
+.TP
+.I \-v
+Sets the system logging to verbose.
+
+.SH CONTROL PORT
+The control port provides a simple interface for controlling the ports and 
+viewing their status. To accomplish this, it has 7 commands. They are as 
+follows:
+.TP
+.B enable port <TCP port expr>
+Enable data transfer a port or device. This command is only valid for
+ports with active network connections.
+.TP
+.B disable port <TCP port expr>
+Disable data transfer a port or device. This command is only valid for
+ports with active network connections.
+.TP
+.B disconnect port <TCP port expr>
+Disconnects an existing network connection to a port or device. This command is 
+only valid for ports with active network connections.
+.TP
+.B show port <TCP port expr>
+Show the status of an individual port or all of the ports.
+.TP
+.B verbose
+Toggle the displaying of a prompt and making the output a more user friendly.
+Because this interface was primarily built for a another program to use. 
+The default condition is to
+.B not
+have a prompt shown.
+.TP
+.B help
+Display a short list and summary of commands.
+.PP
+The TCP port expressions are expected to be regular expressions to
+match the ports with. For individual ports, their service name or the IP port
+number may be given. To deal with multiple ports in one command, a regular 
+expression should be used. To see or effect all ports, use the expression '.*'.
+.PP
+.SS Bug:
+Sadly the the Control Port does not work with termnet! Use telnet to connect to it 
+instead. The termnet program will just hang if you attempt to connect to 
+the control port using it.
+
+.SH CONFIGURATION
+Configuration is accomplished through the file
+.BR /etc/termnetd.conf .
+A file with another name or path may be specified using the
+.I \-c
+option.  This  file consists of one or more entries with the following
+format:
+.IP
+.BR "<IP port>:<state>:<device>:<termios options>;"
+.PP
+.SS FIELDS
+.TP
+.I "IP port"
+Name  or number of the TCP/IP port to accept connections from for this
+device.
+.TP
+.I state
+Either 
+.BR on
+or
+.BR off .
+This  effectively enables or disables the port / device from accepting
+connections.
+.TP
+.I device
+The  name  of  the  device  to connect to. This must be in the form of
+.BR /dev/<device> .
+.TP
+.I "termios options"
+A  list  of  names  corresponding to the
+.BR "termios options"
+to be enabled
+when the device is opened. These names must be capitalized and use the
+same spelling as those specified in the 
+.BR termios
+man page.
+.PP
+Each  entry can use as many lines as needed to fit all of the required
+termios  options.  Be  sure not to forget the semi-colon at the end of
+the entry.
+.PP
+The  configuration  file  is  read  once at startup. The
+.BR SIGHUP
+signal  will  force the daemon to close any connections and re\-scan the
+configuration file. 
+
+.SS CONFIGURATION EXAMPLES
+.BR "Example 1"
+.PP
+3000:on:/dev/cua1:B300 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3001:on:/dev/cua2:B300 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3002:on:/dev/cua3:B300 CLOCAL IGNBRK CRTSCTS CS8;
+.PP
+4000:on:/dev/cua1:B2400 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+4001:on:/dev/cua2:B2400 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+4002:on:/dev/cua3:B2400 CLOCAL IGNBRK CRTSCTS CS8;
+.PP
+5000:on:/dev/cua1:B9600 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+5001:on:/dev/cua2:B9600 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+5002:on:/dev/cua3:B9600 CLOCAL IGNBRK CRTSCTS CS8;
+.PP
+6000:on:/dev/cua1:B19200 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+6001:on:/dev/cua2:B19200 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+6002:on:/dev/cua3:B19200 CLOCAL IGNBRK CRTSCTS CS8;
+.PP
+This configuration allows you to connect to three different modems,
+.BR /dev/cua1 ,
+.BR /dev/cua2
+and
+.BR /dev/cua3 ,
+at  three different baud rates. If you connect to the TCP/IP socket at
+port
+.BR 300X ,
+you will connect at 300 baud, while ports 
+.BR 400X ,
+.BR 500X 
+and
+.BR 500X
+will set the baud rate to 2400, 9600 and 19200 respectively.
+.PP
+The
+.I CLOCAL
+option  allows  you  to communicate with a modem without carrier being
+present. The
+.I CRTSCTS
+option  causes the CTS and RTS lines to be used for flow control. Note
+that  as  far  as  I  can  tell,  SCO, AIX and OSF do not support this
+option.
+.PP
+.BR "Example 2"
+.PP
+3000:on:/dev/cua3:B300 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3000:on:/dev/cua2:B300 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3000:on:/dev/cua1:B300 CLOCAL IGNBRK CRTSCTS CS8;
+.PP
+3001:on:/dev/cua3:B2400 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3001:on:/dev/cua2:B2400 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3001:on:/dev/cua1:B2400 CLOCAL IGNBRK CRTSCTS CS8;
+.PP
+3002:on:/dev/cua3:B9600 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3002:on:/dev/cua2:B9600 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3002:on:/dev/cua1:B9600 CLOCAL IGNBRK CRTSCTS CS8;
+.PP
+3003:on:/dev/cua3:B19200 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3003:on:/dev/cua2:B19200 CLOCAL IGNBRK CRTSCTS CS8;
+.br
+3003:on:/dev/cua1:B19200 CLOCAL IGNBRK CRTSCTS CS8;
+.PP
+This  configuration sets the ports up to be connected in a round robin
+fashion. If multiple connections are made to the same socket, Ei. port
+.BR 3000 ,
+the  connection  will  be made to the first available device specified
+for  the  port  number.  Note  that  the devices are listed in reverse
+order.  This  is  because  the  internal  lists  to termnetd are built
+backwards. Therefore, the first device to be connected to will be
+.BR /dev/cua1 .
+
+.SH FILES
+/etc/termnetd.conf
+
+.SH "SEE ALSO"
+termnet(1), ttyd(1), termios(2)
+
+.SH "KNOWN PROBLEMS"
+Connections from telnet program that do no option negotiation may cause
+problems. This has been experienced using telnet from AIX where the 
+destination port is not 'telnet'. The AIX telnet program only sends telnet 
+negotiation to connections to the port 'telnet'.
+.SH AUTHOR
+.PP
+Joe Croft <joe@croftj.net>
